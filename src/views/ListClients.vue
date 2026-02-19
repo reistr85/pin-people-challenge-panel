@@ -10,7 +10,7 @@
       <v-col cols="8" md="8" offset="2">
         <v-card
           v-for="client in clients"
-          :key="client.id"
+          :key="client.uuid"
           class="w-100 my-2 elevation-0 border rounded-lg"
         >
           <v-card-text>
@@ -20,8 +20,8 @@
                 <p class="text-body-2 text-grey-darken-1">{{ client.email }}</p>
               </div>
               <div>
-                <v-btn icon="mdi-eye" variant="text" size="small" color="primary" :to="`/clients/${client.id}`"></v-btn>
-                <v-btn icon="mdi-pencil" variant="text" size="small" color="warning"></v-btn>
+                <v-btn icon="mdi-eye" variant="text" size="small" color="primary" :to="`/clientes/${client.uuid}`"></v-btn>
+                <v-btn icon="mdi-pencil" variant="text" size="small" color="warning" :to="`/clientes/${client.uuid}/editar`"></v-btn>
                 <v-btn icon="mdi-delete" variant="text" size="small" color="error"></v-btn>
               </div>
             </div>
@@ -41,7 +41,7 @@ defineOptions({
 })
 
 interface Client {
-  id: string
+  uuid: string
   name: string
   email: string
 }

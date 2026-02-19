@@ -9,8 +9,9 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', component: Dashboard },
-    { path: '/clients', component: ListClients },
-    { path: '/clients/:id', component: ShowClient },
+    { path: '/clientes', component: ListClients },
+    { path: '/clientes/:uuid', component: ShowClient },
+    { path: '/clientes/:uuid/editar', component: ShowClient },
   ],
 })
 
