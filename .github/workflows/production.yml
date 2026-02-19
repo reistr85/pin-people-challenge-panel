@@ -1,0 +1,101 @@
+name: Deploy in Production
+# on:
+#   push:
+#     tags:
+#       - 'v*.*.*'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  site-deploy:
+    name: 🎉 Deploy Panel in Production
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      # SLACK_TITLE: 'Deploy Production - Panel'
+      # SLACK_ICON: https://pinpeople.mgetech.com.br/favicon.png
+      # SLACK_USERNAME: MGE Technology Deploy
+      # SLACK_URL_APP: 'https://pinpeople.mgetech.com.br'
+
+    steps:
+      # - name: Slack Notification
+      #   uses: rtCamp/action-slack-notify@v2
+      #   continue-on-error: true
+      #   env:
+      #     SLACK_CHANNEL: ${{ vars.VITE_SLACK_WEBHOOK_CHANNEL }}
+      #     SLACK_COLOR: '#FFD700'
+      #     SLACK_ICON: ${{ env.SLACK_ICON }}
+      #     SLACK_TITLE: '${{ env.SLACK_TITLE }} :hourglass_flowing_sand:'
+      #     SLACK_MESSAGE: "Deploy Started \n${{ env.SLACK_URL_APP }}"
+      #     SLACK_USERNAME: ${{ env.SLACK_USERNAME }}
+      #     SLACK_WEBHOOK: ${{ vars.VITE_SLACK_WEBHOOK_URL }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.16.0'
+
+      - name: Environments
+        run: |
+          touch .env
+            echo NODE_ENV="production" >> .env
+            echo VITE_VERSION="${{ github.sha }}" >> .env
+            echo VITE_PROJECT_NAME="Pin People" >> .env
+            echo VITE_COMPANY="MGE Technology LTD" >> .env
+            echo VITE_API_URL="${{ vars.VITE_API_URL }}" >> .env
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Vue.js app
+        run: npm run build
+
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: '${{ secrets.AWS_S3 }}' # The only name of the S3 bucket
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: 'dist'
+
+      - name: Invalidate CloudFront Cache via AWS CLI
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+
+      # - name: Slack Notification
+      #   if: success()
+      #   uses: rtCamp/action-slack-notify@v2
+      #   continue-on-error: true
+      #   env:
+      #     SLACK_CHANNEL: ${{ vars.VITE_SLACK_WEBHOOK_CHANNEL }}
+      #     SLACK_COLOR: '#2E8B57'
+      #     SLACK_ICON: ${{ env.SLACK_ICON }}
+      #     SLACK_TITLE: '${{ env.SLACK_TITLE }} :rocket:'
+      #     SLACK_MESSAGE: "Deploy Succeeded \n${{ env.SLACK_URL_APP }}"
+      #     SLACK_USERNAME: ${{ env.SLACK_USERNAME }}
+      #     SLACK_WEBHOOK: ${{ vars.VITE_SLACK_WEBHOOK_URL }}
+
+      # - name: Slack Notification
+      #   if: failure()
+      #   uses: rtCamp/action-slack-notify@v2
+      #   continue-on-error: true
+      #   env:
+      #     SLACK_CHANNEL: ${{ vars.VITE_SLACK_WEBHOOK_CHANNEL }}
+      #     SLACK_COLOR: '#F00'
+      #     SLACK_ICON: ${{ env.SLACK_ICON }}
+      #     SLACK_TITLE: '${{ env.SLACK_TITLE }} :x:'
+      #     SLACK_MESSAGE: "Deploy Failure \n${{ env.SLACK_URL_APP }}"
+      #     SLACK_USERNAME: ${{ env.SLACK_USERNAME }}
+      #     SLACK_WEBHOOK: ${{ vars.VITE_SLACK_WEBHOOK_URL }}
