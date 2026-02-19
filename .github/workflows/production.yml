@@ -14,7 +14,7 @@ jobs:
     name: 🎉 Deploy Panel in Production
     runs-on: ubuntu-latest
     environment: production
-    env:
+    # env:
       # SLACK_TITLE: 'Deploy Production - Panel'
       # SLACK_ICON: https://pinpeople.mgetech.com.br/favicon.png
       # SLACK_USERNAME: MGE Technology Deploy
