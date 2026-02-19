@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import api from '@/api'
 
 defineOptions({
   name: 'ListClients',
@@ -47,12 +48,13 @@ interface Client {
 
 const clients = ref<Client[]>([])
 
+const getClients = async () => {
+  const response = await api.get('/clients')
+  clients.value = response.data
+}
+
 onMounted(() => {
-  clients.value = [
-    { id: '1', name: 'MGE Technology LTD', email: 'info@mge.technology' },
-    { id: '2', name: 'Vera Health', email: 'info@vera.health' },
-    { id: '3', name: 'Infração Digital', email: 'info@infracao.digital' },
-  ]
+  getClients()
 })
 </script>
 
