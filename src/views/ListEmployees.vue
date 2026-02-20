@@ -12,6 +12,33 @@
         <p class="text-body-2 text-grey-darken-1 mt-1">
           {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
         </p>
+
+        <v-card class="mt-4 mb-2 elevation-0 border rounded-lg">
+          <v-card-text>
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="filterName"
+                  label="Filtrar por nome"
+                  density="compact"
+                  hide-details
+                  clearable
+                  @update:model-value="onFilterChange"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="filterEmail"
+                  label="Filtrar por email"
+                  density="compact"
+                  hide-details
+                  clearable
+                  @update:model-value="onFilterChange"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
 
@@ -99,6 +126,9 @@ interface Employee {
 
 const employees = ref<Employee[]>([])
 const page = ref(Math.max(1, parseInt(String(route.query.page), 10) || 1))
+const filterName = ref(String(route.query.name ?? ''))
+const filterEmail = ref(String(route.query.email ?? ''))
+let filterTimeout: ReturnType<typeof setTimeout> | null = null
 const meta = ref({
   current_page: 1,
   total_pages: 1,
@@ -157,11 +187,17 @@ function resetSnackbar() {
 }
 
 const getEmployees = async (pageNumber = 1) => {
-  const response = await api.get('/employees', {
-    params: { page: pageNumber, per_page: meta.value.per_page },
-  })
+  const params: Record<string, string | number> = {
+    page: pageNumber,
+    per_page: meta.value.per_page,
+  }
+  if ((filterName?.value ?? '').trim()) params.name = (filterName?.value ?? '').trim()
+  if ((filterEmail?.value ?? '').trim()) params.email = (filterEmail?.value ?? '').trim()
+
+  const response = await api.get('/employees', { params })
   const data = response.data
   employees.value = data?.data ?? data ?? []
+  
   if (data?.meta) {
     meta.value = {
       current_page: data.meta.current_page,
@@ -170,6 +206,29 @@ const getEmployees = async (pageNumber = 1) => {
       per_page: data.meta.per_page ?? meta.value.per_page,
     }
   }
+}
+
+const buildFilterQuery = () => {
+  const query: Record<string, string> = { page: '1' }
+  const name = (filterName.value ?? '').toString().trim()
+  const email = (filterEmail.value ?? '').toString().trim()
+  if (name) query.name = name
+  if (email) query.email = email
+  return query
+}
+
+const onFilterChange = () => {
+  if (filterTimeout) clearTimeout(filterTimeout)
+  filterTimeout = setTimeout(() => {
+    page.value = 1
+    router.replace({
+      path: route.path,
+      query: buildFilterQuery(),
+    })
+
+    getEmployees(1)
+    filterTimeout = null
+  }, 400)
 }
 
 const onPageChange = (newPage: number) => {
@@ -182,11 +241,13 @@ const onPageChange = (newPage: number) => {
 }
 
 onMounted(() => {
-  if (!route.query.page) {
-    router.replace({
-      path: route.path,
-      query: { ...route.query, page: String(page.value) },
-    })
+  const query: Record<string, string> = {
+    page: String(route.query.page || page.value),
+    ...(filterName.value && { name: filterName.value }),
+    ...(filterEmail.value && { email: filterEmail.value }),
+  }
+  if (JSON.stringify(route.query) !== JSON.stringify(query)) {
+    router.replace({ path: route.path, query })
   }
   getEmployees(page.value)
 })

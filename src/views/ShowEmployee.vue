@@ -32,13 +32,60 @@
                 </v-btn>
               </v-form>
             </div>
-            <div v-else>
-              <h1 class="text-h6">{{ employee?.name }}</h1>
-              <p class="text-body-2 text-grey-darken-1">{{ employee?.personal_email ?? '-' }}</p>
-              <p class="text-body-2 text-grey-darken-1">{{ employee?.corporation_email ?? '-' }}</p>
-              <p class="text-body-2 text-grey-darken-1">{{ employee?.city ?? '-' }} {{ employee?.uf ? `- ${employee.uf}` : '' }}</p>
-              <p class="text-body-2 text-grey-darken-1">Tempo de casa: {{ employee?.tenure ?? '-' }}</p>
-              <p class="text-body-2 text-grey-darken-1">Gênero: {{ employee?.gender ?? '-' }}</p>
+            <div v-else class="employee-detail">
+              <div class="d-flex align-center gap-3 mb-6">
+                <v-avatar color="primary" size="56" variant="tonal">
+                  <span class="text-h5 text-primary">{{ (employee?.name ?? '?').charAt(0).toUpperCase() }}</span>
+                </v-avatar>
+                <div>
+                  <h2 class="text-h5 font-weight-medium mb-0">{{ employee?.name ?? '-' }}</h2>
+                  <p v-if="employee?.corporation_email || employee?.personal_email" class="text-body-2 text-medium-emphasis mb-0 mt-1">
+                    {{ employee?.corporation_email || employee?.personal_email }}
+                  </p>
+                </div>
+              </div>
+
+              <v-divider class="my-4" />
+
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-email-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Email pessoal</span>
+                    <span class="text-body-2">{{ employee?.personal_email ?? '-' }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-briefcase-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Email corporativo</span>
+                    <span class="text-body-2">{{ employee?.corporation_email ?? '-' }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-map-marker-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Localização</span>
+                    <span class="text-body-2">
+                      {{ [employee?.city, employee?.uf].filter(Boolean).join(' — ') || '-' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-clock-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Tempo de casa</span>
+                    <span class="text-body-2">{{ employee?.tenure ?? '-' }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-account-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Gênero</span>
+                    <span class="text-body-2">{{ employee?.gender ?? '-' }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </v-card-text>
         </v-card>
@@ -174,5 +221,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.employee-detail {
+  max-width: 640px;
+}
 
+.detail-grid {
+  display: grid;
+  gap: 1rem 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-on-surface), 0.03);
+}
 </style>
