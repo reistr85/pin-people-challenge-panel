@@ -15,10 +15,22 @@
           </v-btn>
         </div>
 
-        <v-card v-if="employees.length > 0" class="filter-card mb-4 elevation-0 rounded-lg">
+        <v-card class="filter-card mb-4 elevation-0 rounded-lg">
           <v-card-text>
             <v-row dense>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="filterClient"
+                  label="Filtrar por cliente"
+                  :items="clientOptions"
+                  density="compact"
+                  hide-details
+                  clearable
+                  prepend-inner-icon="mdi-account-group-outline"
+                  @update:model-value="onFilterChange"
+                />
+              </v-col>
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="filterName"
                   label="Filtrar por nome"
@@ -29,7 +41,7 @@
                   @update:model-value="onFilterChange"
                 />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="filterEmail"
                   label="Filtrar por email"
@@ -52,7 +64,7 @@
           <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-hard-hat-outline</v-icon>
           <p class="text-h6 text-medium-emphasis mb-2">Nenhum colaborador encontrado</p>
           <p class="text-body-2 text-medium-emphasis mb-4">
-            {{ filterName || filterEmail ? 'Tente ajustar os filtros ou adicione um novo colaborador.' : 'Adicione seu primeiro colaborador para começar.' }}
+            {{ filterName || filterEmail || filterClient ? 'Tente ajustar os filtros ou adicione um novo colaborador.' : 'Adicione seu primeiro colaborador para começar.' }}
           </p>
           <v-btn color="primary" :to="'/colaboradores/novo'">
             <v-icon start>mdi-plus</v-icon>
@@ -125,6 +137,9 @@
           :length="meta.total_pages"
           :total-visible="7"
           class="mt-4"
+          rounded="circle"
+          size="small"
+          color="primary"
           @update:model-value="onPageChange"
         />
       </v-col>
@@ -158,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import NotifyInfo from '@/components/NotifyInfo.vue'
@@ -181,10 +196,17 @@ interface Employee {
   gender: string | null
 }
 
+interface Client {
+  uuid: string
+  name: string
+}
+
 const employees = ref<Employee[]>([])
+const clients = ref<Client[]>([])
 const page = ref(Math.max(1, parseInt(String(route.query.page), 10) || 1))
 const filterName = ref(String(route.query.name ?? ''))
 const filterEmail = ref(String(route.query.email ?? ''))
+const filterClient = ref<string | null>((route.query.client as string) || null)
 let filterTimeout: ReturnType<typeof setTimeout> | null = null
 const meta = ref({
   current_page: 1,
@@ -243,6 +265,13 @@ function resetSnackbar() {
   }, 2000)
 }
 
+const clientOptions = computed(() =>
+  clients.value.map((c) => ({
+    title: c.name,
+    value: c.uuid,
+  }))
+)
+
 const getEmployees = async (pageNumber = 1) => {
   const params: Record<string, string | number> = {
     page: pageNumber,
@@ -250,6 +279,7 @@ const getEmployees = async (pageNumber = 1) => {
   }
   if ((filterName?.value ?? '').trim()) params.name = (filterName?.value ?? '').trim()
   if ((filterEmail?.value ?? '').trim()) params.email = (filterEmail?.value ?? '').trim()
+  if (filterClient.value) params.client_uuid = filterClient.value
 
   const response = await api.get('/employees', { params })
   const data = response.data
@@ -269,8 +299,10 @@ const buildFilterQuery = () => {
   const query: Record<string, string> = { page: '1' }
   const name = (filterName.value ?? '').toString().trim()
   const email = (filterEmail.value ?? '').toString().trim()
+  const client = (filterClient.value ?? '').toString().trim()
   if (name) query.name = name
   if (email) query.email = email
+  if (client) query.client = client
   return query
 }
 
@@ -297,11 +329,18 @@ const onPageChange = (newPage: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const getClients = async () => {
+  const response = await api.get('/clients')
+  clients.value = response.data
+}
+
 onMounted(() => {
+  getClients()
   const query: Record<string, string> = {
     page: String(route.query.page || page.value),
     ...(filterName.value && { name: filterName.value }),
     ...(filterEmail.value && { email: filterEmail.value }),
+    ...(filterClient.value && { client: filterClient.value }),
   }
   if (JSON.stringify(route.query) !== JSON.stringify(query)) {
     router.replace({ path: route.path, query })

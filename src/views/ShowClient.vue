@@ -40,6 +40,7 @@
                   </v-btn>
                 </v-form>
               </div>
+              
               <div v-else class="client-detail">
                 <div class="d-flex align-center gap-3 mb-6 w-100">
                   <v-avatar color="primary" size="56" variant="tonal">
@@ -174,7 +175,7 @@ onMounted(() => {
 
 <style scoped>
 .client-detail {
-  max-width: 640px;
+  width: 100%;
 }
 
 .detail-grid {

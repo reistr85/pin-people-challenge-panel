@@ -347,7 +347,7 @@ onMounted(() => {
 
 <style scoped>
 .survey-detail {
-  max-width: 640px;
+  max-width: 100%;
 }
 
 .detail-grid {

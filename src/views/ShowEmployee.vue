@@ -20,6 +20,16 @@
               <v-form v-model="valid" @submit.prevent="saveEmployee">
                 <v-row>
                   <v-col cols="12" md="6">
+                    <v-select
+                      v-model="employee.client_uuid"
+                      label="Cliente"
+                      :items="clientOptions"
+                      clearable
+                      hide-details
+                      prepend-inner-icon="mdi-account-group-outline"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
                     <v-text-field
                       v-model="employee.name"
                       label="Nome"
@@ -43,14 +53,14 @@
                       prepend-inner-icon="mdi-briefcase-outline"
                     />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="5">
                     <v-text-field
                       v-model="employee.city"
                       label="Cidade"
                       prepend-inner-icon="mdi-map-marker-outline"
                     />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="3">
                     <v-select
                       v-model="employee.uf"
                       label="UF"
@@ -60,7 +70,7 @@
                       prepend-inner-icon="mdi-map-marker"
                     />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="4">
                     <v-select
                       v-model="employee.gender"
                       label="Gênero"
@@ -96,6 +106,13 @@
               <v-divider class="my-4" />
 
               <div class="detail-grid">
+                <div v-if="employee?.client" class="detail-item">
+                  <v-icon size="small" color="primary" class="me-2">mdi-account-group-outline</v-icon>
+                  <div>
+                    <span class="text-caption text-medium-emphasis d-block">Cliente</span>
+                    <span class="text-body-2">{{ employee?.client?.name ?? '-' }}</span>
+                  </div>
+                </div>
                 <div class="detail-item">
                   <v-icon size="small" color="primary" class="me-2">mdi-email-outline</v-icon>
                   <div>
@@ -158,6 +175,11 @@ interface RouteParams {
   uuid: string
 }
 
+interface Client {
+  uuid: string
+  name: string
+}
+
 interface Employee {
   uuid: string
   name: string
@@ -167,6 +189,8 @@ interface Employee {
   city: string | null
   tenure: string | null
   gender: string | null
+  client_uuid?: string | null
+  client?: Client | null
   created_at?: string | null
 }
 
@@ -179,10 +203,18 @@ const genderOptions = [
   { title: 'Prefiro não informar', value: 'Prefiro não informar' },
 ]
 
+const clientOptions = computed(() =>
+  clients.value.map((c) => ({
+    title: c.name,
+    value: c.uuid,
+  }))
+)
+
 const route = useRoute()
 const router = useRouter()
 const valid = ref(false)
 const loading = ref(false)
+const clients = ref<Client[]>([])
 const employee = ref<Employee>({
   uuid: '',
   name: '',
@@ -192,6 +224,7 @@ const employee = ref<Employee>({
   city: null,
   tenure: null,
   gender: null,
+  client_uuid: null,
 })
 const snackbar = ref({
   value: false,
@@ -217,10 +250,18 @@ const rules = {
   ],
 }
 
+const getClients = async () => {
+  const response = await api.get('/clients')
+  clients.value = response.data
+}
+
 const getEmployee = async () => {
   if (!uuid.value) return
   const response = await api.get(`/employees/${uuid.value}`)
   employee.value = response.data
+  if (response.data.client) {
+    employee.value.client_uuid = response.data.client.uuid
+  }
 }
 
 const saveEmployee = async () => {
@@ -241,6 +282,7 @@ const saveEmployee = async () => {
         uf: employee.value.uf || null,
         city: employee.value.city || null,
         gender: employee.value.gender || null,
+        client_uuid: employee.value.client_uuid || null,
       },
     }
     if (isEdit.value) {
@@ -288,6 +330,7 @@ function formatTenure(createdAt: string | null | undefined): string {
 }
 
 onMounted(() => {
+  getClients()
   if (!isNew.value) getEmployee()
 })
 </script>

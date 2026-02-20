@@ -7,7 +7,6 @@
       </v-col>
     </v-row>
 
-    <!-- Cards de Métricas -->
     <v-row>
       <v-col cols="12" md="4">
         <v-card class="metric-card" elevation="0" rounded="lg">
@@ -56,7 +55,6 @@
       </v-col>
     </v-row>
 
-    <!-- Gráficos -->
     <v-row class="mt-2">
       <v-col cols="12" md="6">
         <v-card class="chart-card" elevation="0" rounded="lg">
@@ -98,7 +96,6 @@
       </v-col>
     </v-row>
 
-    <!-- Gráfico de Crescimento -->
     <v-row class="mt-2">
       <v-col cols="12">
         <v-card class="chart-card" elevation="0" rounded="lg">
@@ -124,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import api from '@/api'
 
 defineOptions({
@@ -190,15 +187,15 @@ const loadMetrics = async () => {
 const processEmployeesData = (employees: any[]) => {
   const clientMap: Record<string, number> = {}
   employees.forEach((emp: any) => {
-    if (emp.client_uuid) {
-      clientMap[emp.client_uuid] = (clientMap[emp.client_uuid] || 0) + 1
+    if (emp.client?.name) {
+      clientMap[emp.client.name] = (clientMap[emp.client.name] || 0) + 1
     }
   })
 
   const labels: string[] = []
   const data: number[] = []
-  Object.entries(clientMap).forEach(([uuid, count]) => {
-    labels.push(`Cliente ${uuid.slice(0, 8)}`)
+  Object.entries(clientMap).forEach(([name, count]) => {
+    labels.push(`Cliente ${name}`)
     data.push(count)
   })
 
@@ -251,6 +248,8 @@ const processGrowthData = (clients: any[], employees: any[], surveys: any[]) => 
 const initCharts = async () => {
   if (typeof window === 'undefined') return
 
+  destroyCharts()
+
   try {
     const chartModule = await import('chart.js/auto')
     const Chart = chartModule.Chart || (chartModule as any).default
@@ -258,7 +257,6 @@ const initCharts = async () => {
       Chart.register(...(chartModule.registerables || []))
     }
 
-    // Gráfico de Colaboradores por Cliente
     if (employeesChartRef.value && employeesByClient.value.labels.length > 0) {
       employeesChart = new Chart(employeesChartRef.value, {
         type: 'bar',
@@ -284,7 +282,6 @@ const initCharts = async () => {
       })
     }
 
-    // Gráfico de Distribuição de Enquetes
     if (surveysChartRef.value && surveysByClient.value.labels.length > 0) {
       surveysChart = new Chart(surveysChartRef.value, {
         type: 'doughnut',
@@ -314,7 +311,6 @@ const initCharts = async () => {
       })
     }
 
-    // Gráfico de Crescimento
     if (growthChartRef.value && growthData.value.labels.length > 0) {
       growthChart = new Chart(growthChartRef.value, {
         type: 'line',
@@ -368,18 +364,18 @@ const destroyCharts = () => {
   }
 }
 
+const chartsInitialized = ref(false)
+
 watch([employeesByClient, surveysByClient, growthData], () => {
-  if (!loading.value) {
-    destroyCharts()
-    setTimeout(() => {
-      initCharts()
-    }, 100)
+  if (!loading.value && chartsInitialized.value) {
+    nextTick(() => initCharts())
   }
 }, { deep: true })
 
 onMounted(async () => {
   await loadMetrics()
   await initCharts()
+  chartsInitialized.value = true
 })
 
 onBeforeUnmount(() => {
