@@ -15,7 +15,7 @@
           </v-btn>
         </div>
 
-        <v-card class="filter-card mb-4 elevation-0 rounded-lg">
+        <v-card v-if="employees.length > 0" class="filter-card mb-4 elevation-0 rounded-lg">
           <v-card-text>
             <v-row dense>
               <v-col cols="12" md="6">

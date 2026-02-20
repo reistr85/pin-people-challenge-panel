@@ -7,7 +7,7 @@
           <nav class="d-flex justify-start align-center gap-2 ml-16">
             <router-link
               to="/"
-              class="nav-link"
+              class="nav-link mx-2"
               :class="{ 'nav-link--active': isDashboard }"
             >
               <v-icon size="small" :icon="isDashboard ? 'mdi-view-dashboard' : 'mdi-view-dashboard-outline'" />
@@ -15,7 +15,7 @@
             </router-link>
             <router-link
               to="/clientes"
-              class="nav-link"
+              class="nav-link mx-2"
               :class="{ 'nav-link--active': isClientes }"
             >
               <v-icon size="small" :icon="isClientes ? 'mdi-account-group' : 'mdi-account-group-outline'" />
@@ -23,11 +23,19 @@
             </router-link>
             <router-link
               to="/colaboradores"
-              class="nav-link"
+              class="nav-link mx-2"
               :class="{ 'nav-link--active': isColaboradores }"
             >
               <v-icon size="small" :icon="isColaboradores ? 'mdi-account-hard-hat' : 'mdi-account-hard-hat-outline'" />
               <span>Colaboradores</span>
+            </router-link>
+            <router-link
+              to="/enquetes"
+              class="nav-link mx-2"
+              :class="{ 'nav-link--active': isEnquetes }"
+            >
+              <v-icon size="small" :icon="isEnquetes ? 'mdi-clipboard-text' : 'mdi-clipboard-text-outline'" />
+              <span>Enquetes</span>
             </router-link>
           </nav>
         </div>
@@ -84,6 +92,7 @@ onMounted(() => {
 const isDashboard = computed(() => route.path === '/')
 const isClientes = computed(() => route.path.startsWith('/clientes'))
 const isColaboradores = computed(() => route.path.startsWith('/colaboradores'))
+const isEnquetes = computed(() => route.path.startsWith('/enquetes'))
 </script>
 
 <style scoped>
