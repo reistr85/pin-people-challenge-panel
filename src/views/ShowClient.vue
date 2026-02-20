@@ -19,7 +19,7 @@
         >
           <v-card-text>
             <div class="d-flex justify-space-between align-center">
-              <div v-if="isEdit" class="w-100">
+              <div v-if="isEdit || isNew" class="w-100">
                 <v-form v-model="valid" @submit.prevent="saveClient">
                   <v-text-field v-model="client.name" label="Nome" :rules="rules.name" />
                   <v-text-field v-model="client.email" label="Email" :rules="rules.email" />
@@ -80,6 +80,7 @@ const snackbar = ref({
 })
 const uuid = computed(() => (route.params as RouteParams).uuid)
 const isEdit = computed(() => route.path.includes('/editar'))
+const isNew = computed(() => route.path.includes('/novo'))
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const rules = {
   name: [
@@ -108,10 +109,15 @@ const saveClient = async () => {
   try {
     loading.value = true
     snackbar.value.value = false
-    const response = await api.put(`/clients/${uuid.value}`, {
+    const payload = {
       name: client.value.name,
       email: client.value.email,
-    })
+    }
+    if (isEdit.value) {
+      await api.put(`/clients/${uuid.value}`, payload)
+    } else {
+      await api.post('/clients', payload)
+    }
 
     router.push(`/clientes`)
   } catch (error) {

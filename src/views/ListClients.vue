@@ -1,8 +1,14 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="8" md="8" offset="2">
-        <h1>Lista de Clientes</h1>
+      <v-col cols="8" md="8" offset="2" >
+        <div class="d-flex justify-space-between align-center">
+          <h1>Clientes</h1>
+          <v-btn size="small" color="primary" :to="'/clientes/novo'">
+            <v-icon>mdi-plus</v-icon>
+            Novo Cliente
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
 
@@ -22,7 +28,7 @@
               <div>
                 <v-btn icon="mdi-eye" variant="text" size="small" color="primary" :to="`/clientes/${client.uuid}`"></v-btn>
                 <v-btn icon="mdi-pencil" variant="text" size="small" color="warning" :to="`/clientes/${client.uuid}/editar`"></v-btn>
-                <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="openDialog(client)"></v-btn>
+                <v-btn icon="mdi-delete" variant="text" size="small" color="red" @click="openDialog(client)"></v-btn>
               </div>
             </div>
           </v-card-text>
@@ -43,7 +49,10 @@
         <v-divider></v-divider>
         <v-card-actions>
           <v-btn color="primary" @click="dialog = false">Cancelar</v-btn>
-          <v-btn color="error" @click="deleteClient">Deletar</v-btn>
+          <v-btn color="red" variant="flat" @click="deleteClient">
+            <v-icon>mdi-delete</v-icon>
+            Excluir
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

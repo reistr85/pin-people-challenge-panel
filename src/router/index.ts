@@ -10,6 +10,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: Dashboard },
     { path: '/clientes', component: ListClients },
+    { path: '/clientes/novo', component: ShowClient },
     { path: '/clientes/:uuid', component: ShowClient },
     { path: '/clientes/:uuid/editar', component: ShowClient },
   ],
