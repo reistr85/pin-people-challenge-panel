@@ -15,5 +15,19 @@ import { createVuetify } from 'vuetify'
 export default createVuetify({
   theme: {
     defaultTheme: 'system',
+    themes: {
+      light: {
+        colors: {
+          primary: '#ee4c4a',
+          secondary: '#0097a7',
+        },
+      },
+      dark: {
+        colors: {
+          primary: '#ee4c4a',
+          secondary: '#0097a7',
+        },
+      },
+    },
   },
 })

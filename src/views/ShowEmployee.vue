@@ -18,34 +18,68 @@
           <v-card-text>
             <div v-if="isEdit || isNew" class="w-100">
               <v-form v-model="valid" @submit.prevent="saveEmployee">
-                <v-text-field v-model="employee.name" label="Nome" :rules="rules.name" />
-                <v-text-field v-model="employee.personal_email" label="Email pessoal" :rules="rules.personal_email" />
-                <v-text-field v-model="employee.corporation_email" label="Email corporativo" :rules="rules.corporation_email" />
-                <v-select
-                  v-model="employee.uf"
-                  label="UF"
-                  :items="ufOptions"
-                  clearable
-                  density="comfortable"
-                  hide-details
-                  class="mb-2"
-                />
-                <v-text-field v-model="employee.city" label="Cidade" />
-                <v-select
-                  v-model="employee.gender"
-                  label="Gênero"
-                  :items="genderOptions"
-                  clearable
-                  density="comfortable"
-                  hide-details
-                />
-
-                <v-btn color="primary" type="submit" class="mt-4" :loading="loading">
-                  <v-icon>mdi-content-save</v-icon>
-                  Salvar
-                </v-btn>
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="employee.name"
+                      label="Nome"
+                      :rules="rules.name"
+                      prepend-inner-icon="mdi-account-outline"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="employee.personal_email"
+                      label="Email pessoal"
+                      :rules="rules.personal_email"
+                      prepend-inner-icon="mdi-email-outline"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="employee.corporation_email"
+                      label="Email corporativo"
+                      :rules="rules.corporation_email"
+                      prepend-inner-icon="mdi-briefcase-outline"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="employee.city"
+                      label="Cidade"
+                      prepend-inner-icon="mdi-map-marker-outline"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="employee.uf"
+                      label="UF"
+                      :items="ufOptions"
+                      clearable
+                      hide-details
+                      prepend-inner-icon="mdi-map-marker"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="employee.gender"
+                      label="Gênero"
+                      :items="genderOptions"
+                      clearable
+                      hide-details
+                      prepend-inner-icon="mdi-gender-male-female"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="pt-4">
+                    <v-btn color="primary" type="submit" :loading="loading">
+                      <v-icon>mdi-content-save</v-icon>
+                      Salvar
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </v-form>
             </div>
+
             <div v-else class="employee-detail">
               <div class="d-flex align-center gap-3 mb-6 w-100">
                 <v-avatar color="primary" size="56" variant="tonal">

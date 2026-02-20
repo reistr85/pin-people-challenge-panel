@@ -21,10 +21,20 @@
             <div class="d-flex justify-space-between align-center">
               <div v-if="isEdit || isNew" class="w-100">
                 <v-form v-model="valid" @submit.prevent="saveClient">
-                  <v-text-field v-model="client.name" label="Nome" :rules="rules.name" />
-                  <v-text-field v-model="client.email" label="Email" :rules="rules.email" />
-                  
-                    <v-btn color="primary" type="submit" class="mt-4" :loading="loading">
+                  <v-text-field
+                    v-model="client.name"
+                    label="Nome"
+                    :rules="rules.name"
+                    prepend-inner-icon="mdi-account-outline"
+                  />
+                  <v-text-field
+                    v-model="client.email"
+                    label="Email"
+                    :rules="rules.email"
+                    prepend-inner-icon="mdi-email-outline"
+                  />
+
+                  <v-btn color="primary" type="submit" class="mt-4" :loading="loading">
                     <v-icon>mdi-content-save</v-icon>
                     Salvar
                   </v-btn>
