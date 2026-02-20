@@ -21,10 +21,24 @@
                 <v-text-field v-model="employee.name" label="Nome" :rules="rules.name" />
                 <v-text-field v-model="employee.personal_email" label="Email pessoal" :rules="rules.personal_email" />
                 <v-text-field v-model="employee.corporation_email" label="Email corporativo" :rules="rules.corporation_email" />
-                <v-text-field v-model="employee.uf" label="UF" :rules="rules.uf" maxlength="2" counter="2" />
+                <v-select
+                  v-model="employee.uf"
+                  label="UF"
+                  :items="ufOptions"
+                  clearable
+                  density="comfortable"
+                  hide-details
+                  class="mb-2"
+                />
                 <v-text-field v-model="employee.city" label="Cidade" />
-                <v-text-field v-model="employee.tenure" label="Tempo de casa" />
-                <v-text-field v-model="employee.gender" label="Gênero" />
+                <v-select
+                  v-model="employee.gender"
+                  label="Gênero"
+                  :items="genderOptions"
+                  clearable
+                  density="comfortable"
+                  hide-details
+                />
 
                 <v-btn color="primary" type="submit" class="mt-4" :loading="loading">
                   <v-icon>mdi-content-save</v-icon>
@@ -75,7 +89,7 @@
                   <v-icon size="small" color="primary" class="me-2">mdi-clock-outline</v-icon>
                   <div>
                     <span class="text-caption text-medium-emphasis d-block">Tempo de casa</span>
-                    <span class="text-body-2">{{ employee?.tenure ?? '-' }}</span>
+                    <span class="text-body-2">{{ formatTenure(employee?.created_at) }}</span>
                   </div>
                 </div>
                 <div class="detail-item">
@@ -119,7 +133,17 @@ interface Employee {
   city: string | null
   tenure: string | null
   gender: string | null
+  created_at?: string | null
 }
+
+const ufOptions = ['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO']
+
+const genderOptions = [
+  { title: 'Masculino', value: 'Masculino' },
+  { title: 'Feminino', value: 'Feminino' },
+  { title: 'Outro', value: 'Outro' },
+  { title: 'Prefiro não informar', value: 'Prefiro não informar' },
+]
 
 const route = useRoute()
 const router = useRouter()
@@ -157,9 +181,6 @@ const rules = {
   corporation_email: [
     (v: string) => !v?.trim() || emailRegex.test(v.trim()) || 'Informe um email válido',
   ],
-  uf: [
-    (v: string) => !v?.trim() || (v?.trim().length === 2) || 'UF deve ter 2 caracteres',
-  ],
 }
 
 const getEmployee = async () => {
@@ -185,7 +206,6 @@ const saveEmployee = async () => {
         corporation_email: employee.value.corporation_email || null,
         uf: employee.value.uf || null,
         city: employee.value.city || null,
-        tenure: employee.value.tenure || null,
         gender: employee.value.gender || null,
       },
     }
@@ -213,6 +233,24 @@ function resetSnackbar() {
     snackbar.value.value = false
     snackbar.value.message = 'Preencha os campos corretamente'
   }, 2000)
+}
+
+function formatTenure(createdAt: string | null | undefined): string {
+  if (!createdAt) return '-'
+  const start = new Date(createdAt)
+  const now = new Date()
+  const diffMs = now.getTime() - start.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays < 0) return '-'
+  if (diffDays < 30) return diffDays <= 1 ? 'Menos de 1 mês' : `${diffDays} dias`
+  const diffMonths = Math.floor(diffDays / 30)
+  if (diffMonths < 12) return diffMonths === 1 ? '1 mês' : `${diffMonths} meses`
+  const years = Math.floor(diffMonths / 12)
+  const months = diffMonths % 12
+  if (months === 0) return years === 1 ? '1 ano' : `${years} anos`
+  const yearLabel = years === 1 ? '1 ano' : `${years} anos`
+  const monthLabel = months === 1 ? '1 mês' : `${months} meses`
+  return `${yearLabel} e ${monthLabel}`
 }
 
 onMounted(() => {
