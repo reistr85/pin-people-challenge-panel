@@ -30,9 +30,27 @@
                   </v-btn>
                 </v-form>
               </div>
-              <div v-else>
-                <h1 class="text-h6">{{ client?.name }}</h1>
-                <p class="text-body-2 text-grey-darken-1">{{ client?.email ?? '-' }}</p>
+              <div v-else class="client-detail">
+                <div class="d-flex align-center gap-3 mb-6 w-100">
+                  <v-avatar color="primary" size="56" variant="tonal">
+                    <span class="text-h5 text-primary">{{ (client?.name ?? '?').charAt(0).toUpperCase() }}</span>
+                  </v-avatar>
+                  <div class="flex-grow-1 w-100 ml-5">
+                    <h2 class="text-h5 font-weight-medium mb-0">{{ client?.name ?? '-' }}</h2>
+                  </div>
+                </div>
+
+                <v-divider class="my-4" />
+
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <v-icon size="small" color="primary" class="me-2">mdi-email-outline</v-icon>
+                    <div>
+                      <span class="text-caption text-medium-emphasis d-block">Email</span>
+                      <span class="text-body-2">{{ client?.email ?? '-' }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </v-card-text>
@@ -145,5 +163,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.client-detail {
+  max-width: 640px;
+}
 
+.detail-grid {
+  display: grid;
+  gap: 1rem 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-on-surface), 0.03);
+}
 </style>

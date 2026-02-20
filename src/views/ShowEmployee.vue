@@ -33,11 +33,11 @@
               </v-form>
             </div>
             <div v-else class="employee-detail">
-              <div class="d-flex align-center gap-3 mb-6">
+              <div class="d-flex align-center gap-3 mb-6 w-100">
                 <v-avatar color="primary" size="56" variant="tonal">
                   <span class="text-h5 text-primary">{{ (employee?.name ?? '?').charAt(0).toUpperCase() }}</span>
                 </v-avatar>
-                <div>
+                <div class="flex-grow-1 w-100 ml-5">
                   <h2 class="text-h5 font-weight-medium mb-0">{{ employee?.name ?? '-' }}</h2>
                   <p v-if="employee?.corporation_email || employee?.personal_email" class="text-body-2 text-medium-emphasis mb-0 mt-1">
                     {{ employee?.corporation_email || employee?.personal_email }}
