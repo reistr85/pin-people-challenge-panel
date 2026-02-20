@@ -1,19 +1,21 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="8" md="8" offset="2" >
-        <div class="d-flex justify-space-between align-center">
-          <h1>Colaboradores</h1>
-          <v-btn size="small" color="primary" :to="'/colaboradores/novo'">
-            <v-icon>mdi-plus</v-icon>
+      <v-col cols="12" md="10" offset-md="1">
+        <div class="list-header">
+          <div>
+            <h1 class="text-h4 font-weight-medium mb-1">Colaboradores</h1>
+            <p class="text-body-2 text-medium-emphasis mb-0">
+              {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
+            </p>
+          </div>
+          <v-btn color="primary" :to="'/colaboradores/novo'" class="ml-4">
+            <v-icon start>mdi-plus</v-icon>
             Novo Colaborador
           </v-btn>
         </div>
-        <p class="text-body-2 text-grey-darken-1 mt-1">
-          {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
-        </p>
 
-        <v-card class="mt-4 mb-2 elevation-0 border rounded-lg">
+        <v-card class="filter-card mb-4 elevation-0 rounded-lg">
           <v-card-text>
             <v-row dense>
               <v-col cols="12" md="6">
@@ -23,6 +25,7 @@
                   density="compact"
                   hide-details
                   clearable
+                  prepend-inner-icon="mdi-account-outline"
                   @update:model-value="onFilterChange"
                 />
               </v-col>
@@ -33,6 +36,7 @@
                   density="compact"
                   hide-details
                   clearable
+                  prepend-inner-icon="mdi-email-outline"
                   @update:model-value="onFilterChange"
                 />
               </v-col>
@@ -43,23 +47,74 @@
     </v-row>
 
     <v-row>
-      <v-col cols="8" md="8" offset="2">
+      <v-col cols="12" md="10" offset-md="1">
+        <div v-if="employees.length === 0" class="empty-state">
+          <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-hard-hat-outline</v-icon>
+          <p class="text-h6 text-medium-emphasis mb-2">Nenhum colaborador encontrado</p>
+          <p class="text-body-2 text-medium-emphasis mb-4">
+            {{ filterName || filterEmail ? 'Tente ajustar os filtros ou adicione um novo colaborador.' : 'Adicione seu primeiro colaborador para começar.' }}
+          </p>
+          <v-btn color="primary" :to="'/colaboradores/novo'">
+            <v-icon start>mdi-plus</v-icon>
+            Novo Colaborador
+          </v-btn>
+        </div>
+
         <v-card
           v-for="employee in employees"
           :key="employee.uuid"
-          class="w-100 my-2 elevation-0 border rounded-lg"
+          class="employee-card"
+          elevation="0"
+          rounded="lg"
         >
-          <v-card-text>
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <h1 class="text-h6">{{ employee.name }}</h1>
-                <p class="text-body-2 text-grey-darken-1">{{ employee.personal_email || employee.corporation_email || '-' }}</p>
-              </div>
-              <div>
-                <v-btn icon="mdi-eye" variant="text" size="small" color="primary" :to="`/colaboradores/${employee.uuid}`"></v-btn>
-                <v-btn icon="mdi-pencil" variant="text" size="small" color="warning" :to="`/colaboradores/${employee.uuid}/editar`"></v-btn>
-                <v-btn icon="mdi-delete" variant="text" size="small" color="red" @click="openDialog(employee)"></v-btn>
-              </div>
+          <v-card-text class="d-flex align-center py-4">
+            <v-avatar color="primary" size="48" variant="tonal" class="me-4 flex-shrink-0">
+              <span class="text-h6 text-primary">{{ (employee.name ?? '?').charAt(0).toUpperCase() }}</span>
+            </v-avatar>
+            <div class="flex-grow-1 min-w-0">
+              <h2 class="text-subtitle-1 font-weight-medium mb-0 text-truncate">{{ employee.name }}</h2>
+              <p class="text-body-2 text-medium-emphasis mb-0 mt-1 d-flex align-center">
+                <v-icon size="small" class="me-1">mdi-email-outline</v-icon>
+                <span class="text-truncate">{{ employee.personal_email || employee.corporation_email || '-' }}</span>
+              </p>
+            </div>
+            <div class="employee-actions flex-shrink-0">
+              <v-tooltip text="Ver detalhes" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-eye-outline"
+                    variant="text"
+                    size="small"
+                    color="primary"
+                    :to="`/colaboradores/${employee.uuid}`"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Editar" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-pencil-outline"
+                    variant="text"
+                    size="small"
+                    color="primary"
+                    :to="`/colaboradores/${employee.uuid}/editar`"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Excluir" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-delete-outline"
+                    variant="text"
+                    size="small"
+                    color="error"
+                    @click="openDialog(employee)"
+                  />
+                </template>
+              </v-tooltip>
             </div>
           </v-card-text>
         </v-card>
@@ -75,21 +130,23 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500">
-      <v-card>
-        <v-card-title>
-          <h1 class="text-h6">Deletar Colaborador: {{ employeeSelected.name }}</h1>
+    <v-dialog v-model="dialog" max-width="500" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="d-flex align-center">
+          <v-icon color="error" class="me-2">mdi-alert-circle-outline</v-icon>
+          Excluir colaborador
         </v-card-title>
-
         <v-card-text>
-          <p>Tem certeza que deseja deletar o colaborador?</p>
+          <p class="mb-0">
+            Tem certeza que deseja excluir <strong>{{ employeeSelected.name }}</strong>? Esta ação não pode ser desfeita.
+          </p>
         </v-card-text>
-
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-btn color="primary" @click="dialog = false">Cancelar</v-btn>
-          <v-btn color="red" variant="flat" @click="deleteEmployee">
-            <v-icon>mdi-delete</v-icon>
+        <v-divider />
+        <v-card-actions class="px-4 py-3">
+          <v-spacer />
+          <v-btn variant="text" @click="dialog = false">Cancelar</v-btn>
+          <v-btn color="error" variant="flat" @click="deleteEmployee">
+            <v-icon start>mdi-delete-outline</v-icon>
             Excluir
           </v-btn>
         </v-card-actions>
@@ -254,5 +311,44 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.list-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
 
+.filter-card {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.employee-card {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.employee-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.employee-actions {
+  display: flex;
+  gap: 0.25rem;
+}
 </style>

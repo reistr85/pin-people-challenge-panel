@@ -1,11 +1,16 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="8" md="8" offset="2" >
-        <div class="d-flex justify-space-between align-center">
-          <h1>Clientes</h1>
-          <v-btn size="small" color="primary" :to="'/clientes/novo'">
-            <v-icon>mdi-plus</v-icon>
+      <v-col cols="12" md="10" offset-md="1">
+        <div class="list-header">
+          <div>
+            <h1 class="text-h4 font-weight-medium mb-1">Clientes</h1>
+            <p class="text-body-2 text-medium-emphasis mb-0">
+              {{ clients.length }} {{ clients.length === 1 ? 'cliente' : 'clientes' }}
+            </p>
+          </div>
+          <v-btn color="primary" :to="'/clientes/novo'" class="ml-4">
+            <v-icon start>mdi-plus</v-icon>
             Novo Cliente
           </v-btn>
         </div>
@@ -13,44 +18,95 @@
     </v-row>
 
     <v-row>
-      <v-col cols="8" md="8" offset="2">
+      <v-col cols="12" md="10" offset-md="1">
+        <div v-if="clients.length === 0" class="empty-state">
+          <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-group-outline</v-icon>
+          <p class="text-h6 text-medium-emphasis mb-2">Nenhum cliente cadastrado</p>
+          <p class="text-body-2 text-medium-emphasis mb-4">Adicione seu primeiro cliente para começar.</p>
+          <v-btn color="primary" :to="'/clientes/novo'">
+            <v-icon start>mdi-plus</v-icon>
+            Novo Cliente
+          </v-btn>
+        </div>
+
         <v-card
           v-for="client in clients"
           :key="client.uuid"
-          class="w-100 my-2 elevation-0 border rounded-lg"
+          class="client-card"
+          elevation="0"
+          rounded="lg"
         >
-          <v-card-text>
-            <div class="d-flex justify-space-between align-center">
-              <div>
-                <h1 class="text-h6">{{ client.name }}</h1>
-                <p class="text-body-2 text-grey-darken-1">{{ client.email }}</p>
-              </div>
-              <div>
-                <v-btn icon="mdi-eye" variant="text" size="small" color="primary" :to="`/clientes/${client.uuid}`"></v-btn>
-                <v-btn icon="mdi-pencil" variant="text" size="small" color="warning" :to="`/clientes/${client.uuid}/editar`"></v-btn>
-                <v-btn icon="mdi-delete" variant="text" size="small" color="red" @click="openDialog(client)"></v-btn>
-              </div>
+          <v-card-text class="d-flex align-center py-4">
+            <v-avatar color="primary" size="48" variant="tonal" class="me-4 flex-shrink-0">
+              <span class="text-h6 text-primary">{{ (client.name ?? '?').charAt(0).toUpperCase() }}</span>
+            </v-avatar>
+            <div class="flex-grow-1 min-w-0">
+              <h2 class="text-subtitle-1 font-weight-medium mb-0 text-truncate">{{ client.name }}</h2>
+              <p class="text-body-2 text-medium-emphasis mb-0 mt-1 d-flex align-center">
+                <v-icon size="small" class="me-1">mdi-email-outline</v-icon>
+                <span class="text-truncate">{{ client.email }}</span>
+              </p>
+            </div>
+            <div class="client-actions flex-shrink-0">
+              <v-tooltip text="Ver detalhes" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-eye-outline"
+                    variant="text"
+                    size="small"
+                    color="primary"
+                    :to="`/clientes/${client.uuid}`"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Editar" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-pencil-outline"
+                    variant="text"
+                    size="small"
+                    color="primary"
+                    :to="`/clientes/${client.uuid}/editar`"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Excluir" location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    v-bind="props"
+                    icon="mdi-delete-outline"
+                    variant="text"
+                    size="small"
+                    color="error"
+                    @click="openDialog(client)"
+                  />
+                </template>
+              </v-tooltip>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="500">
-      <v-card>
-        <v-card-title>
-          <h1 class="text-h6">Deletar Cliente: {{ clientSelected.name }}</h1>
+    <v-dialog v-model="dialog" max-width="500" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="d-flex align-center">
+          <v-icon color="error" class="me-2">mdi-alert-circle-outline</v-icon>
+          Excluir cliente
         </v-card-title>
-      
         <v-card-text>
-          <p>Tem certeza que deseja deletar o cliente?</p>
+          <p class="mb-0">
+            Tem certeza que deseja excluir <strong>{{ clientSelected.name }}</strong>? Esta ação não pode ser desfeita.
+          </p>
         </v-card-text>
-
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-btn color="primary" @click="dialog = false">Cancelar</v-btn>
-          <v-btn color="red" variant="flat" @click="deleteClient">
-            <v-icon>mdi-delete</v-icon>
+        <v-divider />
+        <v-card-actions class="px-4 py-3">
+          <v-spacer />
+          <v-btn variant="text" @click="dialog = false">Cancelar</v-btn>
+          <v-btn color="error" variant="flat" @click="deleteClient">
+            <v-icon start>mdi-delete-outline</v-icon>
             Excluir
           </v-btn>
         </v-card-actions>
@@ -133,5 +189,40 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.list-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
 
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.client-card {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.client-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.client-actions {
+  display: flex;
+  gap: 0.25rem;
+}
 </style>
