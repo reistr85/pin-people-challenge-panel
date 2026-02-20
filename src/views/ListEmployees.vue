@@ -9,6 +9,9 @@
             Novo Colaborador
           </v-btn>
         </div>
+        <p class="text-body-2 text-grey-darken-1 mt-1">
+          {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
+        </p>
       </v-col>
     </v-row>
 
@@ -33,6 +36,15 @@
             </div>
           </v-card-text>
         </v-card>
+
+        <v-pagination
+          v-if="meta.total_pages > 1"
+          v-model="page"
+          :length="meta.total_pages"
+          :total-visible="7"
+          class="mt-4"
+          @update:model-value="onPageChange"
+        />
       </v-col>
     </v-row>
 
@@ -63,8 +75,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import NotifyInfo from '@/components/NotifyInfo.vue'
+
+const route = useRoute()
+const router = useRouter()
 
 defineOptions({
   name: 'ListEmployees',
@@ -82,6 +98,13 @@ interface Employee {
 }
 
 const employees = ref<Employee[]>([])
+const page = ref(Math.max(1, parseInt(String(route.query.page), 10) || 1))
+const meta = ref({
+  current_page: 1,
+  total_pages: 1,
+  total_count: 0,
+  per_page: 10,
+})
 const employeeSelected = ref<Employee>({
   uuid: '',
   name: '',
@@ -114,7 +137,7 @@ const deleteEmployee = async () => {
     await api.delete(`/employees/${employeeSelected.value.uuid}`)
     dialog.value = false
     snackbar.value.value = true
-    getEmployees()
+    getEmployees(page.value)
   } catch (error) {
     snackbar.value.message = notifyMessageError.value
     snackbar.value.color = notifyColorError.value
@@ -133,13 +156,39 @@ function resetSnackbar() {
   }, 2000)
 }
 
-const getEmployees = async () => {
-  const response = await api.get('/employees')
-  employees.value = response.data?.data ?? response.data ?? []
+const getEmployees = async (pageNumber = 1) => {
+  const response = await api.get('/employees', {
+    params: { page: pageNumber, per_page: meta.value.per_page },
+  })
+  const data = response.data
+  employees.value = data?.data ?? data ?? []
+  if (data?.meta) {
+    meta.value = {
+      current_page: data.meta.current_page,
+      total_pages: data.meta.total_pages,
+      total_count: data.meta.total_count,
+      per_page: data.meta.per_page ?? meta.value.per_page,
+    }
+  }
+}
+
+const onPageChange = (newPage: number) => {
+  router.replace({
+    path: route.path,
+    query: { ...route.query, page: String(newPage) },
+  })
+  getEmployees(newPage)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(() => {
-  getEmployees()
+  if (!route.query.page) {
+    router.replace({
+      path: route.path,
+      query: { ...route.query, page: String(page.value) },
+    })
+  }
+  getEmployees(page.value)
 })
 </script>
 
