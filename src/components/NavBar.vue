@@ -12,8 +12,6 @@
       </v-container>
     </template>
 
-    
-
     <template v-slot:append>
       <v-btn icon="mdi-dots-vertical"></v-btn>
     </template>
