@@ -3,7 +3,7 @@
     <template v-slot:prepend>
       <v-container>
         <div class="d-flex justify-start align-center px-16">
-          <v-img src="https://cdn.prod.website-files.com/5fa09bc3928ec91d04260b62/622a1830fe8ba05e67a8c78a_Logo%20horizontal-p-500.png" width="150" />
+          <v-img :src="logoSrc" width="150" alt="pinpeople" />
           <nav class="d-flex justify-start align-center gap-2 ml-16">
             <router-link
               to="/"
@@ -35,20 +35,52 @@
     </template>
 
     <template v-slot:append>
+      <div class="d-flex align-center gap-1 mr-2">
+        <v-icon size="small" :icon="isDark ? 'mdi-weather-night' : 'mdi-weather-sunny'" />
+        <v-switch
+          :model-value="isDark"
+          @update:model-value="toggleTheme"
+          color="primary"
+          hide-details
+          density="compact"
+          class="mt-0 ml-5"
+        />
+      </div>
       <v-btn icon="mdi-dots-vertical"></v-btn>
     </template>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useTheme } from 'vuetify'
+import logoDark from '@/assets/logo-dark.png'
 
 defineOptions({
   name: 'NavBar',
 })
 
+const logoLight = 'https://cdn.prod.website-files.com/5fa09bc3928ec91d04260b62/622a1830fe8ba05e67a8c78a_Logo%20horizontal-p-500.png'
+
 const route = useRoute()
+const theme = useTheme()
+const isDark = computed(() => theme.name.value === 'dark')
+const logoSrc = computed(() => (isDark.value ? logoDark : logoLight))
+
+const toggleTheme = (value: boolean | null) => {
+  const name = value ? 'dark' : 'light'
+  theme.change(name)
+  localStorage.setItem('app-theme', name)
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem('app-theme')
+  if (saved === 'dark' || saved === 'light') {
+    theme.change(saved)
+  }
+})
+
 const isDashboard = computed(() => route.path === '/')
 const isClientes = computed(() => route.path.startsWith('/clientes'))
 const isColaboradores = computed(() => route.path.startsWith('/colaboradores'))
