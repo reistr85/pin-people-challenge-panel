@@ -7,6 +7,7 @@
           <div class="d-flex justify-start align-center gap-4 ml-16">
             <router-link to="/" class="text-black text-decoration-none font-weight-medium">Dashboard</router-link>
             <router-link to="/clientes" class="text-black text-decoration-none font-weight-medium ml-8">Clientes</router-link>
+            <router-link to="/colaboradores" class="text-black text-decoration-none font-weight-medium ml-8">Colaboradores</router-link>
           </div>
         </div>
       </v-container>
