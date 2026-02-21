@@ -164,6 +164,66 @@
                   </v-card-text>
                 </v-card>
               </div>
+
+              <!-- Colaborador: formulário para responder à enquete -->
+              <template v-if="isCollaborator && surveyQuestions.length > 0">
+                <v-divider class="my-4" />
+                <h3 class="text-h6 mb-3">Responder à enquete</h3>
+                <p class="text-body-2 text-medium-emphasis mb-4">
+                  Preencha sua nota (0 a 10) e/ou um comentário para cada pergunta.
+                </p>
+                <v-form ref="responseFormRef" @submit.prevent="submitResponses">
+                  <v-card
+                    v-for="(question, index) in surveyQuestions"
+                    :key="question.uuid"
+                    class="question-response-card mb-3"
+                    elevation="0"
+                    rounded="lg"
+                  >
+                    <v-card-text>
+                      <div class="d-flex align-start gap-2 mb-2">
+                        <v-icon size="small" color="primary" class="me-2 mt-1">{{ index + 1 }}.</v-icon>
+                        <span class="text-body-1">{{ question.question }}</span>
+                      </div>
+                      <v-row dense>
+                        <v-col cols="12" sm="4" md="3">
+                          <v-text-field
+                            v-model="getResponseFor(question.uuid!).value"
+                            label="Nota (0-10)"
+                            type="number"
+                            min="0"
+                            max="10"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details
+                            prepend-inner-icon="mdi-numeric"
+                          />
+                        </v-col>
+                        <v-col cols="12" sm="8" md="9">
+                          <v-textarea
+                            v-model="getResponseFor(question.uuid!).comment"
+                            label="Comentário (opcional)"
+                            rows="2"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details
+                            prepend-inner-icon="mdi-comment-text-outline"
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                  <v-btn
+                    color="primary"
+                    type="submit"
+                    class="mt-4"
+                    :loading="submittingResponses"
+                  >
+                    <v-icon start>mdi-send</v-icon>
+                    Enviar respostas
+                  </v-btn>
+                </v-form>
+              </template>
             </div>
           </v-card-text>
         </v-card>
@@ -185,7 +245,7 @@ defineOptions({
   name: 'ShowSurvey',
 })
 
-const { canEditSurveys } = useAuth()
+const { canEditSurveys, isCollaborator } = useAuth()
 
 interface RouteParams {
   uuid: string
@@ -236,6 +296,19 @@ const isEdit = computed(() => route.path.includes('/editar'))
 const isNew = computed(() => route.path.includes('/novo'))
 const surveyQuestions = computed(() => survey.value.survey_questions || [])
 
+const responseForm = ref<Record<string, { value: number | null; comment: string | null }>>({})
+const responseFormRef = ref(null)
+const submittingResponses = ref(false)
+
+function getResponseFor(questionUuid: string): { value: number | null; comment: string | null } {
+  let entry = responseForm.value[questionUuid]
+  if (entry == null) {
+    entry = { value: null, comment: null }
+    responseForm.value[questionUuid] = entry
+  }
+  return entry
+}
+
 // Collaborator: only view; redirect from novo/editar
 watch(
   () => [route.path, canEditSurveys.value],
@@ -280,6 +353,12 @@ const getClients = async () => {
   clients.value = response.data
 }
 
+interface MyResponse {
+  survey_question_uuid: string
+  value: number | null
+  comment: string | null
+}
+
 const getSurvey = async () => {
   if (!uuid.value) return
   const response = await api.get(`/surveys/${uuid.value}`)
@@ -292,6 +371,46 @@ const getSurvey = async () => {
   }
   if (response.data.client) {
     survey.value.client_uuid = response.data.client.uuid
+  }
+  const myRes = (response.data.survey_question_responses || []) as MyResponse[]
+  const next: Record<string, { value: number | 0; comment: string | '' }> = {}
+  for (const q of response.data.survey_questions || []) {
+    const r = myRes.find((x) => x.survey_question_uuid === q.uuid)
+    next[q.uuid] = {
+      value: r?.value || 0,
+      comment: r?.comment || '',
+    }
+  }
+  responseForm.value = { ...next }
+}
+
+const submitResponses = async () => {
+  if (!uuid.value || surveyQuestions.value.length === 0) return
+  try {
+    submittingResponses.value = true
+    const responses = surveyQuestions.value.map((q) => ({
+      survey_question_uuid: q.uuid,
+      value: responseForm.value[q.uuid!]?.value ?? null,
+      comment: responseForm.value[q.uuid!]?.comment?.trim() || null,
+    }))
+    await api.put(`/surveys/${uuid.value}/responses`, { responses })
+    const res = await api.get(`/surveys/${uuid.value}`)
+    const myRes = (res.data.survey_question_responses || []) as MyResponse[]
+    const next: Record<string, { value: number | 0; comment: string | '' }> = {}
+    for (const q of res.data.survey_questions || []) {
+      const r = myRes.find((x: MyResponse) => x.survey_question_uuid === q.uuid)
+      next[q.uuid] = { value: r?.value || 0, comment: r?.comment || '' }
+    }
+    responseForm.value = next
+    survey.value = res.data
+    snackbar.value = { value: true, message: 'Respostas enviadas com sucesso', color: 'success', timeout: 2000 }
+    resetSnackbar()
+  } catch (err: any) {
+    const msg = err?.response?.data?.errors?.join?.(' ') || 'Erro ao enviar respostas'
+    snackbar.value = { value: true, message: msg, color: 'error', timeout: 2000 }
+    resetSnackbar()
+  } finally {
+    submittingResponses.value = false
   }
 }
 
@@ -404,6 +523,11 @@ onMounted(() => {
 }
 
 .question-item {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  background: rgba(var(--v-theme-on-surface), 0.02);
+}
+
+.question-response-card {
   border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
   background: rgba(var(--v-theme-on-surface), 0.02);
 }
