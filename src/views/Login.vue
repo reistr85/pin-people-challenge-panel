@@ -80,7 +80,7 @@ import { useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { useAuth } from '@/composables/useAuth'
 import type { VForm } from 'vuetify/components'
-import logoDark from '@/assets/logo-dark.png'
+import logoDark from '@/assets/logo-dark-transp.png'
 
 defineOptions({
   name: 'Login',

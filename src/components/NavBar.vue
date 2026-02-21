@@ -77,7 +77,7 @@ import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { useAuth } from '@/composables/useAuth'
-import logoDark from '@/assets/logo-dark.png'
+import logoDark from '@/assets/logo-dark-transp.png'
 
 const router = useRouter()
 const { logout, canAccessClients, isAdmin } = useAuth()
