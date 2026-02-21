@@ -34,7 +34,6 @@
             <v-text-field
               v-model="password"
               label="Senha"
-              type="password"
               variant="outlined"
               density="comfortable"
               :rules="[rules.required]"
