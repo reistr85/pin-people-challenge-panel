@@ -165,7 +165,6 @@
                 </v-card>
               </div>
 
-              <!-- Colaborador: formulário para responder à enquete -->
               <template v-if="isCollaborator && surveyQuestions.length > 0">
                 <v-divider class="my-4" />
                 <h3 class="text-h6 mb-3">Responder à enquete</h3>
@@ -309,7 +308,6 @@ function getResponseFor(questionUuid: string): { value: number | null; comment: 
   return entry
 }
 
-// Collaborator: only view; redirect from novo/editar
 watch(
   () => [route.path, canEditSurveys.value],
   () => {
