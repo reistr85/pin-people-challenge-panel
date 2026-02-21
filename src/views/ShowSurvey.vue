@@ -16,7 +16,7 @@
       <v-col cols="12" md="10" offset-md="1">
         <v-card class="w-100 my-2 elevation-0 border rounded-lg">
           <v-card-text>
-            <div v-if="isEdit || isNew" class="w-100">
+            <div v-if="(isEdit || isNew) && canEditSurveys" class="w-100">
               <v-form v-model="valid" @submit.prevent="saveSurvey">
                 <v-row>
                   <v-col cols="12" md="6">
@@ -175,14 +175,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import NotifyInfo from '@/components/NotifyInfo.vue'
 import api from '@/api'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
 defineOptions({
   name: 'ShowSurvey',
 })
+
+const { canEditSurveys } = useAuth()
 
 interface RouteParams {
   uuid: string
@@ -232,6 +235,18 @@ const uuid = computed(() => (route.params as RouteParams).uuid)
 const isEdit = computed(() => route.path.includes('/editar'))
 const isNew = computed(() => route.path.includes('/novo'))
 const surveyQuestions = computed(() => survey.value.survey_questions || [])
+
+// Collaborator: only view; redirect from novo/editar
+watch(
+  () => [route.path, canEditSurveys.value],
+  () => {
+    if (!canEditSurveys.value && (isNew.value || isEdit.value)) {
+      if (uuid.value) router.replace(`/enquetes/${uuid.value}`)
+      else router.replace('/enquetes')
+    }
+  },
+  { immediate: true }
+)
 
 const clientOptions = computed(() =>
   clients.value.map((c) => ({

@@ -123,10 +123,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import api from '@/api'
+import { useAuth } from '@/composables/useAuth'
 
 defineOptions({
   name: 'Dashboard',
 })
+
+const { isCollaborator } = useAuth()
 
 interface Metrics {
   totalClients: number
@@ -161,22 +164,25 @@ let growthChart: any = null
 const loadMetrics = async () => {
   try {
     loading.value = true
+    const clientsPromise = isCollaborator.value ? Promise.resolve({ data: [] }) : api.get('/clients')
     const [clientsRes, employeesRes, surveysRes] = await Promise.all([
-      api.get('/clients'),
+      clientsPromise,
       api.get('/employees?per_page=1000'),
       api.get('/surveys'),
     ])
 
     metrics.value = {
-      totalClients: clientsRes.data.length,
+      totalClients: clientsRes.data?.length ?? 0,
       totalEmployees: employeesRes.data?.data?.length || employeesRes.data?.length || 0,
-      totalSurveys: surveysRes.data.length,
+      totalSurveys: surveysRes.data?.length ?? 0,
     }
 
-    // Processar dados para gráficos
-    processEmployeesData(employeesRes.data?.data || employeesRes.data || [])
-    processSurveysData(surveysRes.data || [])
-    processGrowthData(clientsRes.data, employeesRes.data?.data || employeesRes.data || [], surveysRes.data)
+    const clients = clientsRes.data || []
+    const employees = employeesRes.data?.data || employeesRes.data || []
+    const surveys = surveysRes.data || []
+    processEmployeesData(employees)
+    processSurveysData(surveys)
+    processGrowthData(clients, employees, surveys)
   } catch (error) {
     console.error('Erro ao carregar métricas:', error)
   } finally {

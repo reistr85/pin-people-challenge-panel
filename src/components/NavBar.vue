@@ -14,6 +14,7 @@
               <span>Dashboard</span>
             </router-link>
             <router-link
+              v-if="canAccessClients"
               to="/clientes"
               class="nav-link mx-2"
               :class="{ 'nav-link--active': isClientes }"
@@ -36,6 +37,15 @@
             >
               <v-icon size="small" :icon="isEnquetes ? 'mdi-clipboard-text' : 'mdi-clipboard-text-outline'" />
               <span>Enquetes</span>
+            </router-link>
+            <router-link
+              v-if="isAdmin"
+              to="/importar"
+              class="nav-link mx-2"
+              :class="{ 'nav-link--active': isImportar }"
+            >
+              <v-icon size="small" :icon="isImportar ? 'mdi-file-upload' : 'mdi-file-upload-outline'" />
+              <span>Importar CSV</span>
             </router-link>
           </nav>
         </div>
@@ -70,7 +80,7 @@ import { useAuth } from '@/composables/useAuth'
 import logoDark from '@/assets/logo-dark.png'
 
 const router = useRouter()
-const { logout } = useAuth()
+const { logout, canAccessClients, isAdmin } = useAuth()
 
 async function handleLogout() {
   await logout()
@@ -105,6 +115,7 @@ const isDashboard = computed(() => route.path === '/')
 const isClientes = computed(() => route.path.startsWith('/clientes'))
 const isColaboradores = computed(() => route.path.startsWith('/colaboradores'))
 const isEnquetes = computed(() => route.path.startsWith('/enquetes'))
+const isImportar = computed(() => route.path === '/importar')
 </script>
 
 <style scoped>

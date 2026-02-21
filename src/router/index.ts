@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
-import { getStoredToken } from '@/lib/authStorage'
+import { getStoredToken, getStoredUser } from '@/lib/authStorage'
 
 import NavBar from '@/components/NavBar.vue'
 import ListClients from '@/views/ListClients.vue'
@@ -11,12 +11,14 @@ import ShowClient from '@/views/ShowClient.vue'
 import ShowEmployee from '@/views/ShowEmployee.vue'
 import ShowSurvey from '@/views/ShowSurvey.vue'
 import Login from '@/views/Login.vue'
+import ImportCsv from '@/views/ImportCsv.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/login', component: Login, meta: { public: true } },
     { path: '/', component: Dashboard },
+    { path: '/importar', component: ImportCsv, meta: { adminOnly: true } },
     { path: '/clientes', component: ListClients },
     { path: '/clientes/novo', component: ShowClient },
     { path: '/clientes/:uuid', component: ShowClient },
@@ -34,11 +36,16 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const hasToken = !!getStoredToken()
+  const user = getStoredUser()
   if (to.path === '/login') {
     if (hasToken) return '/'
     return true
   }
   if (!hasToken) return '/login'
+  // Collaborator cannot access clients section
+  if (user?.role === 'collaborator' && to.path.startsWith('/clientes')) return '/'
+  // Import CSV only for admins
+  if (to.meta.adminOnly && user?.role !== 'admin') return '/'
   return true
 })
 

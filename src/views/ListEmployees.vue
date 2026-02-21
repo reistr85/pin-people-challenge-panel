@@ -9,7 +9,7 @@
               {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
             </p>
           </div>
-          <v-btn color="primary" :to="'/colaboradores/novo'" class="ml-4">
+          <v-btn v-if="canManageEmployees" color="primary" :to="'/colaboradores/novo'" class="ml-4">
             <v-icon start>mdi-plus</v-icon>
             Novo Colaborador
           </v-btn>
@@ -66,7 +66,7 @@
           <p class="text-body-2 text-medium-emphasis mb-4">
             {{ filterName || filterEmail || filterClient ? 'Tente ajustar os filtros ou adicione um novo colaborador.' : 'Adicione seu primeiro colaborador para começar.' }}
           </p>
-          <v-btn color="primary" :to="'/colaboradores/novo'">
+          <v-btn v-if="canManageEmployees" color="primary" :to="'/colaboradores/novo'">
             <v-icon start>mdi-plus</v-icon>
             Novo Colaborador
           </v-btn>
@@ -115,7 +115,7 @@
                   />
                 </template>
               </v-tooltip>
-              <v-tooltip text="Excluir" location="top">
+              <v-tooltip v-if="canManageEmployees" text="Excluir" location="top">
                 <template #activator="{ props }">
                   <v-btn
                     v-bind="props"
@@ -177,9 +177,11 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import NotifyInfo from '@/components/NotifyInfo.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
+const { canManageEmployees } = useAuth()
 
 defineOptions({
   name: 'ListEmployees',

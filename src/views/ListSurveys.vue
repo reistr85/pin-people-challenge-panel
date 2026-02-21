@@ -9,7 +9,7 @@
               {{ surveys.length }} {{ surveys.length === 1 ? 'enquete' : 'enquetes' }}
             </p>
           </div>
-          <v-btn color="primary" :to="'/enquetes/novo'" class="ml-4">
+          <v-btn v-if="canEditSurveys" color="primary" :to="'/enquetes/novo'" class="ml-4">
             <v-icon start>mdi-plus</v-icon>
             Nova Enquete
           </v-btn>
@@ -23,7 +23,7 @@
           <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-clipboard-text-outline</v-icon>
           <p class="text-h6 text-medium-emphasis mb-2">Nenhuma enquete cadastrada</p>
           <p class="text-body-2 text-medium-emphasis mb-4">Adicione sua primeira enquete para começar.</p>
-          <v-btn color="primary" :to="'/enquetes/novo'">
+          <v-btn v-if="canEditSurveys" color="primary" :to="'/enquetes/novo'">
             <v-icon start>mdi-plus</v-icon>
             Nova Enquete
           </v-btn>
@@ -60,30 +60,32 @@
                   />
                 </template>
               </v-tooltip>
-              <v-tooltip text="Editar" location="top">
-                <template #activator="{ props }">
-                  <v-btn
-                    v-bind="props"
-                    icon="mdi-pencil-outline"
-                    variant="text"
-                    size="small"
-                    color="primary"
-                    :to="`/enquetes/${survey.uuid}/editar`"
-                  />
-                </template>
-              </v-tooltip>
-              <v-tooltip text="Excluir" location="top">
-                <template #activator="{ props }">
-                  <v-btn
-                    v-bind="props"
-                    icon="mdi-delete-outline"
-                    variant="text"
-                    size="small"
-                    color="error"
-                    @click="openDialog(survey)"
-                  />
-                </template>
-              </v-tooltip>
+              <template v-if="canEditSurveys">
+                <v-tooltip text="Editar" location="top">
+                  <template #activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      icon="mdi-pencil-outline"
+                      variant="text"
+                      size="small"
+                      color="primary"
+                      :to="`/enquetes/${survey.uuid}/editar`"
+                    />
+                  </template>
+                </v-tooltip>
+                <v-tooltip text="Excluir" location="top">
+                  <template #activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      icon="mdi-delete-outline"
+                      variant="text"
+                      size="small"
+                      color="error"
+                      @click="openDialog(survey)"
+                    />
+                  </template>
+                </v-tooltip>
+              </template>
             </div>
           </v-card-text>
         </v-card>
@@ -121,10 +123,13 @@
 import { ref, onMounted } from 'vue'
 import api from '@/api'
 import NotifyInfo from '@/components/NotifyInfo.vue'
+import { useAuth } from '@/composables/useAuth'
 
 defineOptions({
   name: 'ListSurveys',
 })
+
+const { canEditSurveys } = useAuth()
 
 interface Survey {
   uuid: string
