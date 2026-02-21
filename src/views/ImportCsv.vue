@@ -141,7 +141,8 @@ const snackbarInfos = computed(() => ({
 
 function getSelectedFile(v: File[] | File | null): File | null {
   if (!v) return null
-  return Array.isArray(v) ? (v.length > 0 ? v[0] : null) : v instanceof File ? v : null
+  if (Array.isArray(v)) return v.length > 0 ? (v[0] ?? null) : null
+  return v instanceof File ? v : null
 }
 
 const rules = {
