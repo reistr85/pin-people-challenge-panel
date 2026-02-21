@@ -54,16 +54,28 @@
           class="mt-0 ml-5"
         />
       </div>
-      <v-btn icon="mdi-dots-vertical"></v-btn>
+      <v-btn variant="text" color="primary" @click="handleLogout">
+        <v-icon size="small" class="mr-1">mdi-logout</v-icon>
+        Sair
+      </v-btn>
     </template>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
+import { useAuth } from '@/composables/useAuth'
 import logoDark from '@/assets/logo-dark.png'
+
+const router = useRouter()
+const { logout } = useAuth()
+
+async function handleLogout() {
+  await logout()
+  router.replace('/login')
+}
 
 defineOptions({
   name: 'NavBar',
