@@ -16,6 +16,7 @@ export function useAuth() {
   const isAdmin = computed(() => user.value?.role === 'admin')
   const isClient = computed(() => user.value?.role === 'client')
   const isCollaborator = computed(() => user.value?.role === 'collaborator')
+  const canAccessAdmin = computed(() => isAdmin.value)
   const canAccessClients = computed(() => isAdmin.value || isClient.value)
   const canAccessEmployees = computed(() => true)
   const canAccessSurveys = computed(() => true)
@@ -65,6 +66,7 @@ export function useAuth() {
     isAdmin,
     isClient,
     isCollaborator,
+    canAccessAdmin,
     canAccessClients,
     canAccessEmployees,
     canAccessSurveys,
