@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar :elevation="2">
+  <v-app-bar :elevation="2" class="px-5">
     <template v-slot:prepend>
       <div class="d-flex align-center flex-grow-1">
         <v-img :src="logoSrc" width="150" alt="pinpeople" class="shrink-0 logo-img" />
@@ -37,7 +37,7 @@
           color="primary"
           hide-details
           density="compact"
-          class="mt-0"
+          class="mt-0 ml-3"
         />
       </div>
       <v-btn v-if="!mobile" variant="text" color="primary" @click="handleLogout" class="logout-btn">

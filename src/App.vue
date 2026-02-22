@@ -6,7 +6,7 @@
       </template>
       <template v-else>
         <NavBar />
-        <v-container class="px-16 py-8">
+        <v-container>
           <router-view />
         </v-container>
       </template>

@@ -91,42 +91,50 @@
               </p>
             </div>
             <div class="employee-actions flex-shrink-0">
-              <v-tooltip text="Ver detalhes" location="top">
-                <template #activator="{ props }">
-                  <v-btn
-                    v-bind="props"
-                    icon="mdi-eye-outline"
-                    variant="text"
-                    size="small"
-                    color="primary"
-                    :to="`/colaboradores/${employee.uuid}`"
-                  />
+              <template v-if="!mobile">
+                <v-tooltip text="Ver detalhes" location="top">
+                  <template #activator="{ props }">
+                    <v-btn v-bind="props" icon="mdi-eye-outline" variant="text" size="small" color="primary" :to="`/colaboradores/${employee.uuid}`" />
+                  </template>
+                </v-tooltip>
+                <v-tooltip text="Editar" location="top">
+                  <template #activator="{ props }">
+                    <v-btn v-bind="props" icon="mdi-pencil-outline" variant="text" size="small" color="primary" :to="`/colaboradores/${employee.uuid}/editar`" />
+                  </template>
+                </v-tooltip>
+                <v-tooltip v-if="canManageEmployees" text="Excluir" location="top">
+                  <template #activator="{ props }">
+                    <v-btn v-bind="props" icon="mdi-delete-outline" variant="text" size="small" color="error" @click="openDialog(employee)" />
+                  </template>
+                </v-tooltip>
+              </template>
+              <v-menu
+                v-else
+                :model-value="openMenuId === employee.uuid"
+                :close-on-content-click="true"
+                location="bottom end"
+                origin="top end"
+                transition="scale-transition"
+                @update:model-value="(v) => (openMenuId = v ? employee.uuid : null)"
+              >
+                <template #activator="{ props: menuProps }">
+                  <v-btn v-bind="menuProps" aria-label="Ações" icon="mdi-dots-vertical" variant="text" size="small" color="primary" />
                 </template>
-              </v-tooltip>
-              <v-tooltip text="Editar" location="top">
-                <template #activator="{ props }">
-                  <v-btn
-                    v-bind="props"
-                    icon="mdi-pencil-outline"
-                    variant="text"
-                    size="small"
-                    color="primary"
-                    :to="`/colaboradores/${employee.uuid}/editar`"
-                  />
-                </template>
-              </v-tooltip>
-              <v-tooltip v-if="canManageEmployees" text="Excluir" location="top">
-                <template #activator="{ props }">
-                  <v-btn
-                    v-bind="props"
-                    icon="mdi-delete-outline"
-                    variant="text"
-                    size="small"
-                    color="error"
-                    @click="openDialog(employee)"
-                  />
-                </template>
-              </v-tooltip>
+                <v-list min-width="180">
+                  <v-list-item :to="`/colaboradores/${employee.uuid}`" @click="openMenuId = null">
+                    <template #prepend><v-icon size="small">mdi-eye-outline</v-icon></template>
+                    <v-list-item-title>Ver detalhes</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item :to="`/colaboradores/${employee.uuid}/editar`" @click="openMenuId = null">
+                    <template #prepend><v-icon size="small">mdi-pencil-outline</v-icon></template>
+                    <v-list-item-title>Editar</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item v-if="canManageEmployees" @click="openDialog(employee); openMenuId = null">
+                    <template #prepend><v-icon size="small" color="error">mdi-delete-outline</v-icon></template>
+                    <v-list-item-title class="text-error">Excluir</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
             </div>
           </v-card-text>
         </v-card>
@@ -175,13 +183,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import api from '@/api'
 import NotifyInfo from '@/components/NotifyInfo.vue'
 import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
+const { mobile } = useDisplay()
 const { canManageEmployees } = useAuth()
+const openMenuId = ref<string | null>(null)
 
 defineOptions({
   name: 'ListEmployees',
