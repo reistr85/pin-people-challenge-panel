@@ -34,11 +34,11 @@ Serviços utilizados para hospedagem, entrega e rede do painel:
 
 | Logo | Serviço | Descrição |
 |------|---------|-----------|
-| <img src="https://cdn.simpleicons.org/amazons3/569A31" width="24" height="24" alt="S3" /> | **Amazon S3** | Bucket onde o build estático do painel (HTML, JS, CSS) é publicado. Contém os artefatos de `npm run build`. |
-| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **Amazon CloudFront** | CDN que serve o painel a partir do S3. Reduz latência e distribui o tráfego com cache na borda. |
-| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **AWS Certificate Manager (ACM)** | Certificados SSL/TLS para HTTPS no CloudFront (ou domínio customizado). Renovação gerenciada pela AWS. |
+| <img src="public/s3.png" width="24" height="24" alt="S3" /> | **Amazon S3** | Bucket onde o build estático do painel (HTML, JS, CSS) é publicado. Contém os artefatos de `npm run build`. |
+| <img src="public/CloudFront.png" width="24" height="24" alt="CloudFront" /> | **Amazon CloudFront** | CDN que serve o painel a partir do S3. Reduz latência e distribui o tráfego com cache na borda. |
+| <img src="public/certificate.png" width="24" height="24" alt="ACM" /> | **AWS Certificate Manager (ACM)** | Certificados SSL/TLS para HTTPS no CloudFront (ou domínio customizado). Renovação gerenciada pela AWS. |
 | <img src="https://cdn.simpleicons.org/cloudflare/F38020" width="24" height="24" alt="Cloudflare" /> | **Cloudflare** | DNS, proxy e proteção na frente do CloudFront ou da origem. Cache, WAF e mitigação de DDoS. |
-| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **Invalidation de cache (CloudFront)** | Invalidação de objetos em cache no CloudFront após novo deploy, para que os usuários recebam a versão mais recente do painel. |
+| <img src="public/CloudFront.png" width="24" height="24" alt="CloudFront" /> | **Invalidation de cache (CloudFront)** | Invalidação de objetos em cache no CloudFront após novo deploy, para que os usuários recebam a versão mais recente do painel. |
 | <img src="https://cdn.simpleicons.org/vuedotjs/4FC08D" width="24" height="24" alt="Vue" /> | **Vue** | Framework front-end reativo usado no projeto (Vue 3 com Composition API). |
 | <img src="https://cdn.simpleicons.org/vuetify/1867C0" width="24" height="24" alt="Vuetify" /> | **Vuetify** | Biblioteca de componentes e temas Material Design para Vue (layout, formulários, tabelas, etc.). |
 
