@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" md="10" offset-md="1">
+      <v-col cols="12">
         <div class="list-header">
           <div>
             <h1 class="text-h4 font-weight-medium mb-1">Colaboradores</h1>
@@ -9,7 +9,7 @@
               {{ meta.total_count }} {{ meta.total_count === 1 ? 'colaborador' : 'colaboradores' }}
             </p>
           </div>
-          <v-btn v-if="canManageEmployees" color="primary" :to="'/colaboradores/novo'" class="ml-4">
+          <v-btn v-if="canManageEmployees" color="primary" :to="'/colaboradores/novo'">
             <v-icon start>mdi-plus</v-icon>
             Novo Colaborador
           </v-btn>
@@ -59,7 +59,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" md="10" offset-md="1">
+      <v-col cols="12">
         <div v-if="employees.length === 0" class="empty-state">
           <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-hard-hat-outline</v-icon>
           <p class="text-h6 text-medium-emphasis mb-2">Nenhum colaborador encontrado</p>

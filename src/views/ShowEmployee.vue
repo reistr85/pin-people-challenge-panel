@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="8" md="8" offset="2" >
+      <v-col cols="12">
         <div class="d-flex justify-space-between align-center">
-          <h1>Detalhes do Colaborador</h1>
+          <h1>Colaborador</h1>
           <v-btn variant="text" size="small" color="primary" :to="'/colaboradores'">
             <v-icon>mdi-arrow-left</v-icon>
             Voltar
@@ -13,7 +13,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols="8" md="8" offset="2">
+      <v-col cols="12">
         <v-card class="w-100 my-2 elevation-0 border rounded-lg">
           <v-card-text>
             <div v-if="isEdit || isNew" class="w-100">
@@ -337,7 +337,7 @@ onMounted(() => {
 
 <style scoped>
 .employee-detail {
-  max-width: 640px;
+  max-width: 100%;
 }
 
 .detail-grid {

@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" md="10" offset-md="1">
+      <v-col cols="12">
         <h1 class="text-h4 font-weight-medium mb-1">Importar CSV</h1>
         <p class="text-body-2 text-medium-emphasis mb-4">
           Envie um arquivo CSV para importar colaboradores e respostas da pesquisa de clima.
@@ -10,21 +10,6 @@
         <v-card class="import-card" elevation="0" rounded="lg">
           <v-card-text class="pa-6">
             <v-form ref="formRef" @submit.prevent="submit">
-              <v-select
-                v-model="clientUuid"
-                label="Cliente (opcional)"
-                :items="clientOptions"
-                item-title="title"
-                item-value="value"
-                variant="outlined"
-                density="comfortable"
-                clearable
-                prepend-inner-icon="mdi-account-group-outline"
-                class="mb-4"
-                hint="Deixe em branco para usar 'Cliente Importação'"
-                persistent-hint
-              />
-
               <v-file-input
                 v-model="file"
                 label="Arquivo CSV"
@@ -123,7 +108,6 @@ interface Client {
 
 const formRef = ref<VForm | null>(null)
 const file = ref<File[] | File | null>(null)
-const clientUuid = ref<string | null>(null)
 const clients = ref<Client[]>([])
 const loading = ref(false)
 const error = ref('')
@@ -204,7 +188,6 @@ async function confirmImport() {
     const formData = new FormData()
     formData.append('file', f)
     formData.append('clear_database', 'true')
-    if (clientUuid.value) formData.append('client_uuid', clientUuid.value)
 
     const { data } = await api.post<{ job_id: string; status: string; message: string }>(
       '/imports/csv',

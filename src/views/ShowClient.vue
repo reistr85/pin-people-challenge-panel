@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="8" md="8" offset="2" >
+      <v-col cols="12">
         <div class="d-flex justify-space-between align-center">
-          <h1>Detalhes do Cliente</h1>
+          <h1>Cliente</h1>
           <v-btn variant="text" size="small" color="primary" :to="'/clientes'">
             <v-icon>mdi-arrow-left</v-icon>
             Voltar
@@ -13,7 +13,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols="8" md="8" offset="2">
+      <v-col cols="12">
         <v-card
           class="w-100 my-2 elevation-0 border rounded-lg"
         >
