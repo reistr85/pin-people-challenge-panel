@@ -1,81 +1,99 @@
-# Vuetify (Default)
+# Pin People – Painel
 
-This is the official scaffolding tool for Vuetify, designed to give you a head start in building your new Vuetify application. It sets up a base template with all the necessary configurations and standard directory structure, enabling you to begin development without the hassle of setting up the project from scratch.
+Interface em Vue do Pin People: gestão de clientes, colaboradores, enquetes, importação CSV e respostas às enquetes por colaboradores.
 
-## ❗️ Important Links
+---
 
-- 📄 [Docs](https://vuetifyjs.com/)
-- 🚨 [Issues](https://issues.vuetifyjs.com/)
-- 🏬 [Store](https://store.vuetifyjs.com/)
-- 🎮 [Playground](https://play.vuetifyjs.com/)
-- 💬 [Discord](https://community.vuetifyjs.com)
+## Tecnologias
 
-## 💿 Install
+| Camada | Tecnologia |
+|--------|------------|
+| **Framework** | Vue 3 |
+| **UI** | Vuetify 3 |
+| **Linguagem** | TypeScript |
+| **Build** | Vite 7 |
+| **Roteamento** | Vue Router 4 |
+| **HTTP** | Axios |
+| **Gráficos** | Chart.js |
+| **Fontes** | Roboto, MDI Icons |
 
-Set up your project using your preferred package manager. Use the corresponding command to install the dependencies:
+### Principais dependências
 
-| Package Manager                                                | Command        |
-|---------------------------------------------------------------|----------------|
-| [yarn](https://yarnpkg.com/getting-started)                   | `yarn install` |
-| [npm](https://docs.npmjs.com/cli/v7/commands/npm-install)     | `npm install`  |
-| [pnpm](https://pnpm.io/installation)                          | `pnpm install` |
-| [bun](https://bun.sh/#getting-started)                        | `bun install`  |
+- **vue** – framework reativo
+- **vuetify** – componentes e temas (Material Design)
+- **vue-router** – SPA e guards (admin, cliente, colaborador)
+- **axios** – chamadas à API com token no header
+- **chart.js** – gráficos no dashboard
+- **vite** – bundler e dev server com HMR
 
-After completing the installation, your environment is ready for Vuetify development.
+---
 
-## ✨ Features
+## Serviços AWS e infraestrutura
 
-- 🖼️ **Optimized Front-End Stack**: Leverage the latest Vue 3 and Vuetify 3 for a modern, reactive UI development experience. [Vue 3](https://v3.vuejs.org/) | [Vuetify 3](https://vuetifyjs.com/en/)
-- 🗃️ **State Management**: Integrated with [Pinia](https://pinia.vuejs.org/), the intuitive, modular state management solution for Vue.
-- 🚦 **Routing and Layouts**: Utilizes Vue Router for SPA navigation and vite-plugin-vue-layouts-next for organizing Vue file layouts. [Vue Router](https://router.vuejs.org/) | [vite-plugin-vue-layouts-next](https://github.com/loicduong/vite-plugin-vue-layouts-next)
-- 💻 **Enhanced Development Experience**: Benefit from TypeScript's static type checking and the ESLint plugin suite for Vue, ensuring code quality and consistency. [TypeScript](https://www.typescriptlang.org/) | [ESLint Plugin Vue](https://eslint.vuejs.org/)
-- ⚡ **Next-Gen Tooling**: Powered by Vite, experience fast cold starts and instant HMR (Hot Module Replacement). [Vite](https://vitejs.dev/)
-- 🧩 **Automated Component Importing**: Streamline your workflow with unplugin-vue-components, automatically importing components as you use them. [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components)
-- 🛠️ **Strongly-Typed Vue**: Use vue-tsc for type-checking your Vue components, and enjoy a robust development experience. [vue-tsc](https://github.com/johnsoncodehk/volar/tree/master/packages/vue-tsc)
+Serviços utilizados para hospedagem, entrega e rede do painel:
 
-These features are curated to provide a seamless development experience from setup to deployment, ensuring that your Vuetify application is both powerful and maintainable.
+| Logo | Serviço | Descrição |
+|------|---------|-----------|
+| <img src="https://cdn.simpleicons.org/amazons3/569A31" width="24" height="24" alt="S3" /> | **Amazon S3** | Bucket onde o build estático do painel (HTML, JS, CSS) é publicado. Contém os artefatos de `npm run build`. |
+| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **Amazon CloudFront** | CDN que serve o painel a partir do S3. Reduz latência e distribui o tráfego com cache na borda. |
+| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **AWS Certificate Manager (ACM)** | Certificados SSL/TLS para HTTPS no CloudFront (ou domínio customizado). Renovação gerenciada pela AWS. |
+| <img src="https://cdn.simpleicons.org/cloudflare/F38020" width="24" height="24" alt="Cloudflare" /> | **Cloudflare** | DNS, proxy e proteção na frente do CloudFront ou da origem. Cache, WAF e mitigação de DDoS. |
+| <img src="https://cdn.simpleicons.org/amazonaws/232F3E" width="24" height="24" alt="AWS" /> | **Invalidation de cache (CloudFront)** | Invalidação de objetos em cache no CloudFront após novo deploy, para que os usuários recebam a versão mais recente do painel. |
+| <img src="https://cdn.simpleicons.org/vuedotjs/4FC08D" width="24" height="24" alt="Vue" /> | **Vue** | Framework front-end reativo usado no projeto (Vue 3 com Composition API). |
+| <img src="https://cdn.simpleicons.org/vuetify/1867C0" width="24" height="24" alt="Vuetify" /> | **Vuetify** | Biblioteca de componentes e temas Material Design para Vue (layout, formulários, tabelas, etc.). |
 
-## 💡 Usage
+---
 
-This section covers how to start the development server and build your project for production.
+## Rodar o projeto localmente
 
-### Starting the Development Server
+### Pré-requisitos
 
-To start the development server with hot-reload, run the following command. The server will be accessible at [http://localhost:3000](http://localhost:3000):
+- Node.js 18+ (recomendado 20 ou 22)
+- npm, yarn, pnpm ou bun
 
-```bash
-yarn dev
-```
-
-(Repeat for npm, pnpm, and bun with respective commands.)
-
-> Add NODE_OPTIONS='--no-warnings' to suppress the JSON import warnings that happen as part of the Vuetify import mapping. If you are on Node [v21.3.0](https://nodejs.org/en/blog/release/v21.3.0) or higher, you can change this to NODE_OPTIONS='--disable-warning=5401'. If you don't mind the warning, you can remove this from your package.json dev script.
-
-### Building for Production
-
-To build your project for production, use:
+### Instalação
 
 ```bash
-yarn build
+# Instalar dependências
+npm install
+# ou: yarn install | pnpm install | bun install
 ```
 
-(Repeat for npm, pnpm, and bun with respective commands.)
+### Desenvolvimento
 
-Once the build process is completed, your application will be ready for deployment in a production environment.
+```bash
+npm run dev
+```
 
-## 💪 Support Vuetify Development
+O painel fica em [http://localhost:5173](http://localhost:5173) (ou outra porta indicada pelo Vite). Configure a URL da API (variável de ambiente ou `src/api` conforme o projeto).
 
-This project is built with [Vuetify](https://vuetifyjs.com/en/), a UI Library with a comprehensive collection of Vue components. Vuetify is an MIT licensed Open Source project that has been made possible due to the generous contributions by our [sponsors and backers](https://vuetifyjs.com/introduction/sponsors-and-backers/). If you are interested in supporting this project, please consider:
+### Build para produção
 
-- [Requesting Enterprise Support](https://support.vuetifyjs.com/)
-- [Sponsoring John on Github](https://github.com/users/johnleider/sponsorship)
-- [Sponsoring Kael on Github](https://github.com/users/kaelwd/sponsorship)
-- [Supporting the team on Open Collective](https://opencollective.com/vuetify)
-- [Becoming a sponsor on Patreon](https://www.patreon.com/vuetify)
-- [Becoming a subscriber on Tidelift](https://tidelift.com/subscription/npm/vuetify)
-- [Making a one-time donation with Paypal](https://paypal.me/vuetify)
+```bash
+npm run build
+```
 
-## 📑 License
-[MIT](http://opensource.org/licenses/MIT)
+A saída vai para `dist/`. O conteúdo dessa pasta é o que deve ser publicado no S3 (e servido via CloudFront).
 
-Copyright (c) 2016-present Vuetify, LLC
+### Type-check e lint
+
+```bash
+npm run type-check
+npm run lint
+```
+
+---
+
+## Estrutura resumida
+
+- **`src/views/`** – páginas (Login, Dashboard, Clientes, Colaboradores, Enquetes, Importar CSV)
+- **`src/components/`** – componentes reutilizáveis (NavBar, NotifyInfo, etc.)
+- **`src/composables/`** – lógica reutilizável (ex.: `useAuth`)
+- **`src/router/`** – rotas e guards por perfil (admin, client, collaborator)
+- **`src/api/`** – cliente HTTP (Axios) e base URL da API
+
+---
+
+## Licença
+
+Conforme definido no repositório do projeto.
